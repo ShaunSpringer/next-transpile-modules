@@ -219,6 +219,7 @@ const withTmInitializer = (modules = [], options = {}) => {
 
               absolutePath = moduleDirectory;
             } catch (err) {
+              console.error(err);
               return false;
             }
           } else {
