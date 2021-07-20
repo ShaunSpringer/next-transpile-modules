@@ -19,6 +19,7 @@ const escalade = require('escalade/sync');
 // };
 
 const CWD = process.cwd();
+const DEFAULT_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.css', '.scss', '.sass'];
 
 /**
  * Check if two regexes are equal
@@ -81,7 +82,7 @@ const createWebpackMatcher = (modulesToTranspile, logger = createLogger(false)) 
 /**
  * Transpile modules with Next.js Babel configuration
  * @param {string[]} modules
- * @param {{resolveSymlinks?: boolean, debug?: boolean, __unstable_matcher?: (path: string) => boolean}} options
+ * @param {{resolveSymlinks?: boolean, debug?: boolean, __unstable_matcher?: (path: string) => boolean, extensions: string[]}} options
  */
 const withTmInitializer = (modules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
@@ -92,6 +93,7 @@ const withTmInitializer = (modules = [], options = {}) => {
     const debug = options.debug || false;
 
     const logger = createLogger(debug);
+    const extensions = options.extensions || DEFAULT_EXTENSIONS;
 
     /**
      * Our own Node.js resolver that can ignore symlinks resolution and  can support
@@ -99,7 +101,7 @@ const withTmInitializer = (modules = [], options = {}) => {
      */
     const resolve = enhancedResolve.create.sync({
       symlinks: resolveSymlinks,
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.css', '.scss', '.sass'],
+      extensions,
       mainFields: ['main', 'module', 'source'],
       // Is it right? https://github.com/webpack/enhanced-resolve/issues/283#issuecomment-775162497
       conditionNames: ['require'],
@@ -112,7 +114,7 @@ const withTmInitializer = (modules = [], options = {}) => {
      */
     const deprecatedResolve = enhancedResolve.create.sync({
       symlinks: resolveSymlinks,
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.css', '.scss', '.sass'],
+      extensions,
       mainFields: ['main', 'module', 'source'],
       // Is it right? https://github.com/webpack/enhanced-resolve/issues/283#issuecomment-775162497
       conditionNames: ['require'],
@@ -256,10 +258,12 @@ const withTmInitializer = (modules = [], options = {}) => {
           });
         }
 
+        const extensionsForRegEx = extensions.join('|');
+
         // Add a rule to include and parse all modules (js & ts)
         if (isWebpack5) {
           config.module.rules.push({
-            test: /\.+(js|jsx|mjs|ts|tsx)$/,
+            test: new RegExp(extensionsForRegEx),
             use: options.defaultLoaders.babel,
             include: matcher,
             type: 'javascript/auto',
@@ -274,7 +278,7 @@ const withTmInitializer = (modules = [], options = {}) => {
           }
         } else {
           config.module.rules.push({
-            test: /\.+(js|jsx|mjs|ts|tsx)$/,
+            test: new RegExp(extensionsForRegEx),
             loader: options.defaultLoaders.babel,
             include: matcher,
           });
