@@ -294,6 +294,7 @@ const withTmInitializer = (modules = [], options = {}) => {
           const nextCssLoader = nextCssLoaders.oneOf.find(
             (rule) => rule.sideEffects === false && regexEqual(rule.test, /\.module\.css$/)
           );
+          console.warn('next-transpile-modules - could not find default CSS rule, CSS imports may not work');
 
           const nextSassLoader = nextCssLoaders.oneOf.find(
             (rule) => rule.sideEffects === false && regexEqual(rule.test, /\.module\.(scss|sass)$/)
@@ -356,6 +357,8 @@ const withTmInitializer = (modules = [], options = {}) => {
         if (typeof nextConfig.webpack === 'function') {
           return nextConfig.webpack(config, options);
         }
+
+        console.log("Webpack config", config)
 
         return config;
       },
