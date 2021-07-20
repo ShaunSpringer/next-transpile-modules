@@ -353,12 +353,12 @@ const withTmInitializer = (modules = [], options = {}) => {
           `**node_modules/{${modules.map((mod) => `!(${mod})`).join(',')}}/**/*`,
         ];
 
+        console.log("Webpack config", config)
+
         // Overload the Webpack config if it was already overloaded
         if (typeof nextConfig.webpack === 'function') {
           return nextConfig.webpack(config, options);
         }
-
-        console.log("Webpack config", config)
 
         return config;
       },
